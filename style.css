@@ -276,3 +276,73 @@ nav{order:2}
   .vcap{font-size:.85rem}
   .ava{width:120px;height:120px}
 }
+
+/* ===== RESPONSIVE v2: telefon, planshet, noutbuk, katta ekran, gorizontal telefon ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden}
+body.modal-open{overflow:hidden}
+.viz>*,.cartv>*,.detail>*,.hero-in>*,.owner>*,.steps>*,.step,.card,.citem>*{min-width:0}
+header{padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right));padding-top:max(10px,env(safe-area-inset-top))}
+footer{padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+.toast{max-width:calc(100vw - 32px);text-align:center;bottom:calc(24px + env(safe-area-inset-bottom))}
+.price{white-space:normal}
+.sr span:last-child{text-align:right}
+.hero .btn{margin:0 8px 10px 0}
+.hero .btn.alt{margin-left:0}
+
+/* Menyu (burger) planshetgacha: 900px va undan kichik */
+@media (max-width:900px){
+  header{gap:10px}
+  .cartbtn{order:2}
+  .burger{display:block;order:3}
+  nav{order:4;width:100%;display:none;flex-direction:column;gap:4px;padding:6px 0 4px}
+  nav.open{display:flex}
+  nav a{padding:12px 14px;font-size:1.05rem}
+}
+
+/* Planshet va kichik noutbuk */
+@media (max-width:980px){
+  .stick{max-width:620px;width:100%;margin:0 auto}
+}
+
+/* Sensorli qurilmalar: barmoq uchun qulay o'lchamlar, iOS zoom bo'lmasin */
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  .btn,.chip{min-height:44px}
+  .szc{min-height:36px;display:inline-flex;align-items:center}
+  .sw{width:44px;height:44px}
+  .mx{width:44px;height:44px;top:6px;right:8px}
+  .step2 button{width:42px;height:42px}
+}
+@media (hover:none){
+  .card:hover,.feat.go:hover,.btn:hover{transform:none;box-shadow:none;filter:none}
+}
+
+/* Juda kichik telefonlar (320-360px) */
+@media (max-width:360px){
+  .brandname{font-size:1rem}
+  .cartbtn{padding:8px 10px;font-size:.85rem}
+  h2{font-size:1.6rem}
+  .grid{gap:10px}
+  .chip{padding:6px 12px}
+  .dims input{padding:9px 6px}
+  .citem{grid-template-columns:auto 52px 1fr}
+  .citem .th{width:52px;height:78px}
+  .promo{flex-wrap:wrap}
+  .netgrid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* Gorizontal (landscape) telefon */
+@media (max-height:500px) and (orientation:landscape){
+  header{position:static}
+  .hero{padding:28px 0 60px}
+  .phead{padding:24px 0 44px}
+  .stick,.sumbox{position:static}
+  .modal{align-items:start}
+  .mbox{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
+}
+
+/* Katta ekranlar: noutbuk, monitor, TV */
+@media (min-width:1400px){.wrap{max-width:1280px}}
+@media (min-width:1800px){html{font-size:112.5%}.wrap{max-width:1480px}}
+@media (min-width:2400px){html{font-size:137.5%}.wrap{max-width:1800px}}
