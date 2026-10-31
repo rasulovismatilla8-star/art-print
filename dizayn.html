@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art Print | O'z dizaynim</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="dizayn">
+<main>
+  <div class="phead ph-viz"><div class="wrap"><h1>O'z dizaynim</h1><p>Xohlagan xona va rasm o'lchamini kiriting. Narx 1 m³ hisobida avtomatik chiqadi.</p></div></div>
+  <section class="band b-viz"><div class="wrap">
+    <div class="viz">
+      <div class="stick"><div id="vroom"></div><div class="vcap" id="vcap"></div><div class="calc" id="vcalc"></div></div>
+      <div class="steps">
+        <div class="step">
+          <h3><b>1</b>Rasmni tanlang</h3>
+          <label for="vsrc">Katalogdan yoki o'z suratingiz</label>
+          <select id="vsrc"></select>
+          <label class="drop" id="drop" for="file"><span class="ico">📷</span><strong>Suratni shu yerga tashlang</strong><span>yoki bosib tanlang (JPG, PNG, WEBP, 10 MB gacha)</span></label>
+          <input class="vh" type="file" id="file" accept="image/*">
+          <button class="btn alt net" id="netBtn">Internetdan tanlash</button>
+          <div class="err" id="fileErr"></div>
+          <label for="vtitle">Nomi (o'z rasmingiz uchun)</label>
+          <input type="text" id="vtitle" value="Mening rasmim" maxlength="40">
+        </div>
+        <div class="step">
+          <h3><b>2</b>Xona o'lchami (xohlagan)</h3>
+          <div class="dims">
+            <div><label for="rw">Eni (m)</label><input type="number" id="rw" value="3.5" min="1.5" max="12" step="0.1"></div>
+            <div><label for="rh">Balandligi (m)</label><input type="number" id="rh" value="3" min="2" max="5" step="0.1"></div>
+            <div><label for="rd">Uzunligi (m)</label><input type="number" id="rd" value="4" min="1.5" max="12" step="0.1"></div>
+          </div>
+          <label>Devor rangi</label>
+          <div class="swatches"><span class="swatches" id="vwalls"></span><input type="color" id="vwc" aria-label="O'zingizning rangingiz" title="O'zingizning rangingiz"></div>
+          <label>Devor uslubi</label>
+          <div class="chips" id="vstyle"></div>
+          <label>Pol</label>
+          <div class="chips" id="vfloor"></div>
+        </div>
+        <div class="step">
+          <h3><b>3</b>Rasm o'lchami (xohlagan) va ramka</h3>
+          <div class="dims two">
+            <div><label for="pw">Eni (sm)</label><input type="number" id="pw" value="40" min="10" max="400" step="1"></div>
+            <div><label for="ph">Balandligi (sm)</label><input type="number" id="ph" value="60" min="10" max="400" step="1"></div>
+          </div>
+          <label>Tayyor o'lchamlar</label>
+          <div class="chips" id="vps"></div>
+          <label>Ramka</label>
+          <div class="swatches" id="vframes"></div>
+        </div>
+        <div class="buy">
+          <div class="total">Jami: <span id="vtotal"></span></div>
+          <button class="btn" id="vadd">Savatga qo'shish</button>
+        </div>
+      </div>
+    </div>
+  </div></section>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
