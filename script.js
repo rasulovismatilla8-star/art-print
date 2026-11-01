@@ -1,7 +1,7 @@
 /* ===== SOZLAMALAR: shu yerdan o'zgartiring ===== */
 const CONFIG={
   phone:"+998 97 756 56 52",
-  telegram:"+998 97 756 56 52",   // buyurtmalar shu raqamdagi Telegram profilga boradi
+  telegram:"+998 97 756 56 52",   // Aloqa sahifasida ko'rsatiladi. Buyurtmalar faqat sotuv bo'limiga (sotuv.html) tushadi
   email:"",
   address:"Oriqzor bozori, 2064-do'kon",
   hours:"Har kuni 09:00 – 20:00",
@@ -17,10 +17,6 @@ const CONFIG={
     quote:"",
     photo:""                // surat havolasi, masalan "owner.jpg". Bo'sh bo'lsa ism harfi chiqadi
   },
-  /* Telegram bot (ixtiyoriy, qo'shimcha xabar uchun): @BotFather'dan token, chatId = xabar keladigan chat.
-     Diqqat: token sahifa kodida ochiq turadi. Asosiy buyurtmalar Firebase'ga (sotuv.html) tushadi.
-     Firebase ham, bot ham sozlanmagan bo'lsa: matn nusxalanadi va Telegram ochiladi. */
-  bot:{token:"",chatId:""},
   /* To'lov: provayder bilan shartnoma tuzgach, raqamlarni yozing. Bo'sh bo'lsa DEMO rejim. */
   pay:{payme:{merchant:""},click:{service:"",merchant:""},uzum:{url:""}}
 };
@@ -67,7 +63,7 @@ const PG=document.body.dataset.page;
 const NAV=[["index.html","Bosh sahifa","home"],["rasmlar.html","Rasmlar","rasmlar"],["dizayn.html","O'z dizaynim","dizayn"],["aloqa.html","Aloqa","aloqa"]];
 document.querySelector("main").id="main";
 document.body.insertAdjacentHTML("afterbegin",`<a class="skip" href="#main">Asosiy qismga o'tish</a><header><a class="brand" href="index.html"><span data-logo="44"></span><span class="brandname">Art Print</span></a><nav id="mainnav" aria-label="Menyu">${NAV.map(([h,t,k])=>`<a href="${h}"${k===PG?' class="on" aria-current="page"':""}>${t}</a>`).join("")}</nav><button class="burger" id="burger" aria-label="Menyu" aria-controls="mainnav" aria-expanded="false">☰</button><a class="cartbtn${PG==="savat"?" on":""}" href="savat.html">🛒 Savat <span class="badge" id="count">0</span></a></header>`);
-document.body.insertAdjacentHTML("beforeend",`<footer><div class="wrap foot"><div class="brand" style="color:#fff"><span data-logo="38"></span><span class="brandname">Art Print</span></div><div><a href="tel:${CONFIG.phone.replace(/\s/g,"")}">${CONFIG.phone}</a></div><div>© ${CONFIG.year} Art Print. Barcha huquqlar himoyalangan. <a class="staff" href="sotuv.html">Xodimlar</a></div></div></footer>
+document.body.insertAdjacentHTML("beforeend",`<footer><div class="wrap foot"><div class="brand" style="color:#fff"><span data-logo="38"></span><span class="brandname">Art Print</span></div><div><a href="tel:${CONFIG.phone.replace(/\s/g,"")}">${CONFIG.phone}</a></div><div>© ${CONFIG.year}–${new Date().getFullYear()} Art Print. Barcha huquqlar himoyalangan. <a class="staff" href="sotuv.html">Xodimlar</a></div></div></footer>
 <div class="overlay" id="overlay"></div><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox" id="mbox"></div></div><div class="toast" id="toast" role="status"></div>`);
 document.querySelectorAll("[data-logo]").forEach(e=>e.innerHTML=logo(+e.dataset.logo));
 $("#burger").onclick=()=>{const o=$("header nav").classList.toggle("open"),bt=$("#burger");bt.setAttribute("aria-expanded",o);bt.textContent=o?"✕":"☰"};
@@ -168,11 +164,6 @@ document.addEventListener("error",e=>{
 let cart=[];
 try{cart=(JSON.parse(localStorage.getItem("ap_cart"))||[]).filter(c=>c&&c.key)}catch(e){}
 const saveCart=()=>{try{localStorage.setItem("ap_cart",JSON.stringify(cart))}catch(e){}};
-/* Firebase sozlanmaguncha buyurtmalar shu brauzerda saqlanadi (sotuv bo'limining demo rejimi uchun) */
-const localOrders={
-  load:()=>{try{return JSON.parse(localStorage.getItem("ap_orders"))||[]}catch(e){return[]}},
-  save:a=>{try{localStorage.setItem("ap_orders",JSON.stringify(a))}catch(e){}}
-};
 const badge=()=>{const e=$("#count");if(e)e.textContent=cart.reduce((a,c)=>a+c.qty,0)};
 function addToCart(item){
   const ex=cart.find(c=>c.key===item.key);
@@ -450,7 +441,7 @@ function aloqa(){
   $("#oname").textContent=o.name;
   $("#orole").textContent=o.role;
   $("#ocall").href=tel;
-  $("#cinfo").innerHTML=[["📞","Telefon",`<a href="${tel}">${CONFIG.phone}</a>`],["✈️","Telegram",esc(CONFIG.telegram)],["✉️","Email",CONFIG.email?`<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>`:""],["📍","Manzil",esc(CONFIG.address)],["🕘","Ish vaqti",esc(CONFIG.hours)]]
+  $("#cinfo").innerHTML=[["📞","Telefon",`<a href="${tel}">${CONFIG.phone}</a>`],["✈️","Telegram",`<a href="https://t.me/+${digits(CONFIG.telegram)}" target="_blank" rel="noopener">${esc(CONFIG.telegram)}</a>`],["✉️","Email",CONFIG.email?`<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>`:""],["📍","Manzil",esc(CONFIG.address)],["🕘","Ish vaqti",esc(CONFIG.hours)]]
     .filter(r=>r[2]).map(([i,t,v])=>`<div class="feat"><div class="ico">${i}</div><h3>${t}</h3><p>${v}</p></div>`).join("");
 }
 
@@ -476,7 +467,7 @@ function savat(){
       return;
     }
     if(view==="done"){
-      app.innerHTML=`<div class="blk center"><div class="ico">🎉</div><h2>Rahmat, ${esc(order.name)}!</h2><p>Buyurtma <strong>${order.no}</strong> qabul qilindi. Jami: <strong>${money(order.amount)}</strong>.</p><p>${order.cash?"To'lov buyurtma yetkazilganda amalga oshiriladi.":"To'lov muvaffaqiyatli o'tdi (demo)."} Sotuvchi buyurtmani tasdiqlagach, ${esc(co.phone)} raqamiga qo'ng'iroq qilamiz.</p>${order.manual?`<p class="ok">Buyurtma matni nusxalandi. Ochilgan Telegram chatiga joylab yuboring.</p>`:""}${order.failed?`<p class="err">Buyurtmani yuborib bo'lmadi. Iltimos, ${esc(CONFIG.phone)} raqamiga qo'ng'iroq qiling.</p>`:""}<a class="btn" href="rasmlar.html">Xaridni davom ettirish</a></div>`;
+      app.innerHTML=`<div class="blk center"><div class="ico">🎉</div><h2>Rahmat, ${esc(order.name)}!</h2><p>Buyurtma <strong>${order.no}</strong> qabul qilindi. Jami: <strong>${money(order.amount)}</strong>.</p><p>${order.cash?"To'lov buyurtma yetkazilganda amalga oshiriladi.":"To'lov muvaffaqiyatli o'tdi (demo)."} Sotuvchi buyurtmani tasdiqlagach, ${esc(co.phone)} raqamiga qo'ng'iroq qilamiz.</p>${order.failed?`<p class="err">Buyurtmani yuborib bo'lmadi. Iltimos, ${esc(CONFIG.phone)} raqamiga qo'ng'iroq qiling.</p>`:""}<a class="btn" href="rasmlar.html">Xaridni davom ettirish</a></div>`;
       return;
     }
     if(view==="pay"){
@@ -509,7 +500,7 @@ function savat(){
       <div class="promo"><input type="text" id="pcode" placeholder="Promokod" value="${promo?promo.code:""}" aria-label="Promokod"><button class="btn soft" data-papply>Qo'llash</button></div>
       <div class="${promo?"ok":"err"}">${pmsg}</div>
       <button class="btn big" data-tocheck ${t.n?"":"disabled"}>Rasmiylashtirishga o'tish</button>
-      <div class="note">${money(CONFIG.freeFrom)} dan yuqori buyurtmada yetkazish bepul. Promokodlar: ${Object.keys(CONFIG.promos).join(", ")}</div></section></div>`;
+      <div class="note">${money(CONFIG.freeFrom)} dan yuqori buyurtmada yetkazish bepul.</div></section></div>`;
   }
 
   function payLink(m,o){
@@ -519,31 +510,13 @@ function savat(){
     if(m==="uzum"&&P.uzum.url)return P.uzum.url+(P.uzum.url.includes("?")?"&":"?")+`order=${o.no}&amount=${o.amount}`;
     return"";
   }
-  /* buyurtma matni tasdiqlash paytida tuziladi, chunki keyin savat tozalanadi */
-  function orderText(o,t){
-    const items=cart.filter(c=>c.sel).map((c,i)=>`${i+1}. ${c.title} (${c.sub}) x${c.qty} = ${money(c.price*c.qty)}`).join("\n");
-    const payName=(PAYS.find(p=>p[0]===co.pay)||[,co.pay])[1];
-    return `🛒 Yangi buyurtma ${o.no}\n\n👤 ${o.name}\n📞 ${co.phone}\n`+
-      (co.delivery==="home"?`🚚 Yetkazib berish: ${co.addr.trim()}\n`:`🏬 Do'kondan olib ketish\n`)+
-      `💳 To'lov: ${payName}\n\n${items}\n\n`+
-      (t.disc?`Chegirma (${promo.code}): -${money(t.disc)}\n`:"")+
-      `Jami: ${money(o.amount)}`;
-  }
-  /* Firebase'ga (sotuv bo'limi) va/yoki botga yuboriladi; ikkalasi ham bo'lmasa matn nusxalanib Telegram ochiladi.
+  /* Buyurtma faqat Firebase'ga yoziladi va sotuv bo'limida (sotuv.html) xodimlarga chiqadi.
      15 soniyada javob bo'lmasa yuborilmadi deb hisoblanadi. */
   function notify(o,status){
-    const text=`${o.text}\n\n📌 Holat: ${status}`,B=CONFIG.bot,jobs=[];
-    if(!DB)localOrders.save([{...o.data,payNote:status,status:"yangi",createdAt:Date.now(),id:"L"+Date.now()},...localOrders.load()]);
-    if(DB)jobs.push(DB.collection("orders").add({...o.data,payNote:status,status:"yangi",createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
-    if(B.token&&B.chatId)jobs.push(fetch(`https://api.telegram.org/bot${B.token}/sendMessage`,{method:"POST",body:new URLSearchParams({chat_id:B.chatId,text}),keepalive:true}).then(r=>{if(!r.ok)throw r.status}));
-    if(!jobs.length){
-      o.manual=true;
-      try{navigator.clipboard.writeText(text).catch(()=>{})}catch(e){}
-      window.open(`https://t.me/+${digits(CONFIG.telegram)}`,"_blank");
-      return Promise.resolve();
-    }
+    if(!DB){o.failed=true;return Promise.resolve()}
+    const job=DB.collection("orders").add({...o.data,payNote:status,status:"yangi",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     const late=new Promise((_,no)=>setTimeout(no,15000));
-    return Promise.race([Promise.all(jobs),late]).catch(()=>{o.failed=true});
+    return Promise.race([job,late]).catch(()=>{o.failed=true});
   }
   function finish(status){
     view="sending";render();
@@ -561,12 +534,11 @@ function savat(){
     else msg="";
     if(msg)return render();
     order={no:"AP-"+Math.floor(10000+Math.random()*90000),amount:t.tot+feeOf(t),name:co.name.trim(),cash:co.pay==="cash"};
-    order.text=orderText(order,t);
     order.data={no:order.no,name:order.name,phone:co.phone.trim(),delivery:co.delivery,addr:co.delivery==="home"?co.addr.trim():"",pay:co.pay,
       items:cart.filter(c=>c.sel).map(c=>({title:c.title,sub:c.sub,qty:c.qty,price:c.price})),disc:t.disc,promo:promo?promo.code:"",amount:order.amount};
     if(order.cash)return finish("Naqd, yetkazilganda to'lanadi");
     const link=payLink(co.pay,order);
-    if(link){view="sending";render();notify(order,"To'lov sahifasiga o'tdi, to'lovni tekshiring").then(()=>{location.href=link});return}
+    if(link){view="sending";render();notify(order,"To'lov sahifasiga o'tdi, to'lovni tekshiring").then(()=>{if(order.failed){view="done";render()}else location.href=link});return}
     view="pay";render();
   }
 
@@ -600,7 +572,8 @@ function savat(){
 /* ================= 6-SAHIFA: SOTUV BO'LIMI (egasi va xodimlar) =================
    Kirish Google orqali. Kim nimani ko'ra olishini firestore.rules tekshiradi, bu yerdagi tekshiruv faqat ko'rinish uchun. */
 function sotuv(){
-  const app=$("#adminApp"),LOCAL=!DB||!AUTH;
+  const app=$("#adminApp");
+  if(!DB||!AUTH){app.innerHTML=`<div class="blk center"><div class="ico">⚠️</div><h2>Bazaga ulanib bo'lmadi</h2><p>Internetni tekshirib, sahifani yangilang.</p></div>`;return}
   const ST={yangi:"Yangi",tasdiqlandi:"Tasdiqlandi",yetkazildi:"Yetkazildi",bekor:"Bekor qilingan"};
   const NEXT={yangi:[["tasdiqlandi","Tasdiqlash",""],["bekor","Bekor qilish","alt"]],tasdiqlandi:[["yetkazildi","Yetkazildi",""],["bekor","Bekor qilish","alt"]],yetkazildi:[],bekor:[["yangi","Qayta ochish","alt"]]};
   const PAYN={click:"Click",payme:"Payme",uzum:"Uzum",cash:"Naqd pul"};
@@ -653,8 +626,7 @@ function sotuv(){
       app.innerHTML=`<div class="blk center"><div class="ico">🔐</div><h2>Sotuv bo'limiga kirish</h2><p>Faqat egasi qo'shgan xodimlar kira oladi.</p><button class="btn" data-login>Google bilan kirish</button><div class="err">${esc(err)}</div></div>`;
       return;
     }
-    const top=LOCAL?`<div class="warn blk">Demo rejim: Firebase sozlanmagan, shuning uchun faqat shu brauzerda berilgan buyurtmalar ko'rinadi. Xodim qo'shish Firebase sozlangach ishlaydi.</div>`
-      :`<div class="ctools"><span>${esc(user.email)}${isOwner?" (egasi)":""}</span><button class="rm2" data-logout>Chiqish</button></div>`;
+    const top=`<div class="ctools"><span>${esc(user.email)}${isOwner?" (egasi)":""}</span><button class="rm2" data-logout>Chiqish</button></div>`;
     if(access===null){app.innerHTML=top+`<div class="blk center"><p>Tekshirilmoqda...</p></div>`;return}
     if(!access){app.innerHTML=top+`<div class="blk center"><div class="ico">⛔</div><h2>Ruxsat yo'q</h2><p>Bu email xodimlar ro'yxatida yo'q. Egasidan sizni qo'shishini so'rang.</p></div>`;return}
     const cnt=s=>orders.filter(o=>o.status===s).length;
@@ -670,13 +642,8 @@ function sotuv(){
     subs.push(DB.collection("orders").orderBy("createdAt","desc").limit(300).onSnapshot(s=>{orders=s.docs.map(d=>({...d.data(),id:d.id}));err="";render()},()=>{err="Buyurtmalarni yuklab bo'lmadi.";render()}));
     if(isOwner)subs.push(DB.collection("staff").onSnapshot(s=>{staff=s.docs.map(d=>d.id);render()},()=>{}));
   }
-  if(LOCAL){
-    const reload=()=>{orders=localOrders.load().sort((a,b)=>tsOf(b.createdAt)-tsOf(a.createdAt));render()};
-    user={email:""};access=true;reload();
-    addEventListener("storage",e=>{if(e.key==="ap_orders")reload()});
-  }
-  else app.innerHTML=`<div class="blk center"><p>Yuklanmoqda...</p></div>`;
-  if(!LOCAL)AUTH.onAuthStateChanged(u=>{
+  app.innerHTML=`<div class="blk center"><p>Yuklanmoqda...</p></div>`;
+  AUTH.onAuthStateChanged(u=>{
     stop();user=u;access=null;orders=[];staff=[];render();
     if(!u)return;
     const em=(u.email||"").toLowerCase();
@@ -695,12 +662,6 @@ function sotuv(){
     if(x=g("data-per")){period=x.dataset.per;return render()}
     if(x=g("data-st")){
       const[id,s]=x.dataset.st.split(":");x.disabled=true;
-      if(LOCAL){
-        const a=localOrders.load(),o=a.find(z=>z.id===id);
-        if(o){o.status=s;o.handledBy="demo";localOrders.save(a)}
-        orders=a.sort((p,q)=>tsOf(q.createdAt)-tsOf(p.createdAt));render();toast(ST[s]+": saqlandi");
-        return;
-      }
       DB.collection("orders").doc(id).update({status:s,handledBy:user.email,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})
         .then(()=>toast(ST[s]+": saqlandi")).catch(()=>{err="Saqlab bo'lmadi. Ruxsatingizni tekshiring.";render()});
       return;
