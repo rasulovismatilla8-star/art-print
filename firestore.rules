@@ -1,0 +1,56 @@
+rules_version = '2';
+// Firebase konsoli → Firestore Database → Rules: shu faylni to'liq joylab "Publish" bosing.
+// Haqiqiy himoya shu yerda: sayt kodini o'zgartirgan odam ham bu qoidalarni chetlab o'ta olmaydi.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Egasining Google emaili (kichik harflarda). firebase-config.js dagi OWNER_EMAIL bilan bir xil bo'lsin.
+    function ownerEmail() { return "magamedtursunbekov@gmail.com"; }
+
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function isOwner() { return signedIn() && myEmail() == ownerEmail(); }
+    function isStaff() { return isOwner() || (signedIn() && exists(/databases/$(database)/documents/staff/$(myEmail()))); }
+    function str(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+
+    // Mijoz faqat "yangi" buyurtma yarata oladi; maydonlar va o'lchamlar tekshiriladi.
+    function validOrder(d) {
+      return d.keys().hasOnly(["no","name","phone","delivery","addr","pay","items","disc","promo","amount","payNote","status","createdAt"])
+        && d.keys().hasAll(["no","name","phone","delivery","addr","pay","items","disc","promo","amount","payNote","status","createdAt"])
+        && str(d.no, 1, 20) && str(d.name, 1, 100) && str(d.phone, 5, 30) && str(d.addr, 0, 300)
+        && d.delivery in ["home", "pickup"]
+        && d.pay in ["click", "payme", "uzum", "cash"]
+        && d.items is list && d.items.size() >= 1 && d.items.size() <= 50
+        && d.disc is int && d.disc >= 0
+        && d.amount is int && d.amount > 0 && d.amount < 1000000000
+        && str(d.promo, 0, 20) && str(d.payNote, 0, 100)
+        && d.status == "yangi"
+        && d.createdAt == request.time;
+    }
+
+    match /orders/{id} {
+      allow create: if validOrder(request.resource.data);
+      allow read: if isStaff();
+      // Xodim faqat holatni o'zgartira oladi, summa va mijoz ma'lumotlariga tegolmaydi.
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "handledBy", "updatedAt"])
+        && request.resource.data.status in ["yangi", "tasdiqlandi", "yetkazildi", "bekor"]
+        && request.resource.data.handledBy == request.auth.token.email
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner();
+    }
+
+    // Xodimlar ro'yxati: hujjat nomi = xodimning emaili. Faqat egasi qo'shadi va o'chiradi.
+    match /staff/{email} {
+      allow read: if isStaff();
+      allow create, update: if isOwner() && email == email.lower()
+        && request.resource.data.keys().hasOnly(["addedBy", "addedAt"]);
+      allow delete: if isOwner();
+    }
+
+    // Boshqa hamma narsa yopiq.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
