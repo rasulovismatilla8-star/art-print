@@ -137,9 +137,6 @@ const CATS=[
 const PRODUCTS=[];
 CATS.forEach(([c,st,ad,no],ci)=>{for(let i=0;i<24;i++){const seed=ci*100+i+1;
   PRODUCTS.push({id:PRODUCTS.length+1,title:ad[i%8]+" "+no[(i+3*(i>>3))%8],cat:c,price:90000+Math.floor(rng(seed*7)()*15)*10000,art:{s:st[i%st.length],p:(i*3+ci)%PAL.length,seed}})}});
-const net=(seed,w=400,h=600)=>`https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
-[["Sokin lahza","quiet"],["Ochiq osmon","openair"],["Oltin soat","golden"],["Mayin fokus","soft"],["Olisda","faraway"],["Yangi kun","newday"],["Tong shabadasi","dawn"],["Shahar nuri","citylight"],["Yashil vodiy","valley"],["Kech sohil","shore"],["Qor cho'qqisi","peak"],["Bahor yomg'iri","rain"]]
-.forEach(([t,k],i)=>PRODUCTS.push({id:PRODUCTS.length+1,title:t,cat:"Foto",price:140000+i*5000,url:net(k),art:{s:"mount",p:i%PAL.length,seed:900+i}}));
 PRODUCTS.forEach(p=>p.n=p.id);
 /* Egasi sotuv bo'limida rasm qo'shgan bo'lsa, katalog bazadan olinadi; bo'sh bo'lsa yuqoridagi namunalar qoladi */
 const catalogReady=DB&&(PG==="rasmlar"||PG==="dizayn")
@@ -209,25 +206,6 @@ function squeeze(src,max,limit){
   });
 }
 
-/* ---- internetdan rasm tanlash oynasi ---- */
-function netModal(onPick){
-  const show=k=>{$("#netgrid").innerHTML=[1,2,3,4,5,6].map(i=>`<button class="netpic" data-net="${net(k+i,600,900)}" aria-label="${i}-rasmni tanlash"><img src="${net(k+i,200,300)}" alt=""></button>`).join("")};
-  openModal(`<h2 id="mtitle">Internetdan rasm tanlang</h2>
-  <p class="meta">Istalgan so'zni yozing, yangi suratlar chiqadi. Yoqqanini bosing.</p>
-  <div class="row"><input type="text" id="kw" placeholder="masalan: dengiz" aria-label="So'z"><button class="btn" id="kwgo">Ko'rsatish</button></div>
-  <div class="netgrid" id="netgrid"></div>
-  <label class="f" for="url">Yoki rasm havolasini qo'ying</label>
-  <div class="row"><input type="text" id="url" placeholder="https://..."><button class="btn" id="urlgo">Ishlatish</button></div>
-  <div class="err" id="neterr"></div>`,true);
-  show("art");
-  $("#kwgo").onclick=()=>show($("#kw").value.trim()||"art");
-  $("#netgrid").onclick=e=>{const b=e.target.closest("[data-net]");if(b){closeModal();onPick(b.dataset.net)}};
-  $("#urlgo").onclick=()=>{
-    const u=$("#url").value.trim();
-    if(!/^https:\/\//i.test(u)){$("#neterr").textContent="Havola https:// bilan boshlanishi kerak.";return}
-    closeModal();onPick(u);
-  };
-}
 
 /* ================= 1-SAHIFA: BOSH SAHIFA ================= */
 function home(){
@@ -244,7 +222,7 @@ function rasmlar(){
   <div class="szs" role="group" aria-label="Hajmi">${sizesOf(p).map(k=>`<button class="szc" data-csz="${esc(p.id)}:${k}" aria-pressed="${k===s}">${SIZES[k].d}</button>`).join("")}</div>
   <div class="price">${money(priceOf(p,s))}</div>
   <button class="btn" data-cadd="${esc(p.id)}">Savatga qo'shish</button>
-  <div class="row2"><button class="btn alt" data-open="${esc(p.id)}">Ramka</button>${p.tmp?"":`<a class="btn alt" href="dizayn.html?p=${encodeURIComponent(p.id)}">Xonada</a>`}</div></article>`};
+  <div class="row2"><button class="btn alt" data-open="${esc(p.id)}">Ramka</button><a class="btn alt" href="dizayn.html?p=${encodeURIComponent(p.id)}">Xonada</a></div></article>`};
   function render(){
     const l=PRODUCTS.filter(p=>(K.cat==="Hammasi"||p.cat===K.cat)&&sizesOf(p).length).sort((a,b)=>(a.n*37%131)-(b.n*37%131));
     $("#cchips").innerHTML=["Hammasi",...new Set(PRODUCTS.map(p=>p.cat))].map(c=>`<button class="chip" data-ccat="${esc(c)}" aria-pressed="${c===K.cat}">${esc(c)}</button>`).join("");
@@ -280,13 +258,6 @@ function rasmlar(){
     if(x=e.target.closest("[data-open]"))openDetail(x.dataset.open);
   };
   $("#cmore").onclick=()=>{K.shown+=24;render()};
-  let netN=0;
-  $("#cnet").onclick=()=>{
-    if(!navigator.onLine)return toast("Internet yo'q. Ulanishni tekshiring.");
-    const w=["ocean","forest","desert","city","sky","flower","river","snow","sunset","field","island","garden"];
-    for(let i=0;i<12;i++){netN++;PRODUCTS.push({id:"net"+netN,n:5000+netN,tmp:true,title:"Yangi foto "+netN,cat:"Foto",price:140000+(netN%8)*5000,url:net(w[i]+netN),art:{s:"mount",p:netN%PAL.length,seed:2000+netN}})}
-    K.cat="Foto";K.shown=24;render();toast("12 ta yangi rasm yuklandi");
-  };
   render();
 }
 
@@ -359,7 +330,7 @@ function photoRoomHTML(inner,f,pw,ph,RP,wallW,pos){
 }
 function dizayn(){
   const V={src:"1",wall:WALLS[0],st:"plain",frame:"black",floor:"wood",mode:"sample"};
-  let custom=null,RP=null;const pos={x:.5,y:.4};      // RP = xona surati {src,w,h}
+  let custom=null,cdim=null,RP=null;const pos={x:.5,y:.4};      // cdim = o'z suratining piksel o'lchami, RP = xona surati {src,w,h}
   const qp=new URLSearchParams(location.search).get("p");
   V.src=String((qp&&PRODUCTS.find(x=>String(x.id)===qp)||PRODUCTS[0]).id);
   $("#vsrc").innerHTML=`<option value="custom">📷 O'z suratim (yuklash)</option>`+[...new Set(PRODUCTS.map(p=>p.cat))].map(c=>`<optgroup label="${esc(c)}">${PRODUCTS.filter(p=>p.cat===c).map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")}</optgroup>`).join("");
@@ -386,7 +357,8 @@ function dizayn(){
       <div class="sr"><span>Rasm hajmi ulushi</span><span>${nm(c.m3)} m³</span></div>
       <div class="sr"><span>Narx (1 m³ = ${money(CONFIG.pricePerM3)})</span><span>${money(c.sum)}</span></div>
       <div class="sr"><span>Ramka (${f.name})</span><span>+${money(f.add)}</span></div>
-      ${fit<1?`<div class="warn">Rasm devorga sig'maydi, ko'rsatish uchun kichraytirildi. Narx haqiqiy o'lcham bo'yicha.</div>`:""}`;
+      ${fit<1?`<div class="warn">Rasm devorga sig'maydi, ko'rsatish uchun kichraytirildi. Narx haqiqiy o'lcham bo'yicha.</div>`:""}
+      ${!vProd()&&cdim&&dpi(pw,ph)<100?`<div class="warn">⚠️ Suratingiz ${cdim.w}×${cdim.h} piksel, ${nm(pw)}×${nm(ph)} sm uchun bu kam: bosma xira chiqishi mumkin. Kichikroq o'lcham tanlang yoki sifatliroq surat yuklang.</div>`:""}`;
     $("#vsrc").value=V.src;
     $("#vwalls").innerHTML=WALLS.map((w,i)=>`<button class="sw" data-v="wall:${w}" style="background:${w}" aria-label="${i+1}-rang" aria-pressed="${w===V.wall}"></button>`).join("");
     $("#vwc").value=/^#[0-9a-f]{6}$/i.test(V.wall)?V.wall:"#ffffff";
@@ -395,8 +367,11 @@ function dizayn(){
     $("#vps").innerHTML=PRESETS.map(s=>`<button class="chip" data-ps="${s}" aria-pressed="${s===nm(pw)+"x"+nm(ph)}">${s.replace("x","×")} sm</button>`).join("");
     $("#vframes").innerHTML=frameBtns(V.frame,true)+`<div class="fname">${f.name} (+${money(f.add)})</div>`;
     $("#vtotal").textContent=money(c.sum+f.add);
-    $("#vadd").disabled=!vProd()&&!custom;
+    $("#vadd").disabled=!vProd()&&!(custom&&$("#vrights").checked);
+    $("#rightsBox").hidden=!!vProd();
   }
+  /* bosma sifati: 1 dyuymga (2.54 sm) necha piksel to'g'ri keladi; uzun tomon uzun tomonga solishtiriladi */
+  const dpi=(pw,ph)=>Math.min(Math.max(cdim.w,cdim.h)/Math.max(pw,ph),Math.min(cdim.w,cdim.h)/Math.min(pw,ph))*2.54;
   $(".viz").addEventListener("click",e=>{const x=e.target.closest("[data-v]");if(!x)return;const s=x.dataset.v,i=s.indexOf(":");V[s.slice(0,i)]=s.slice(i+1);render()});
   $("#vps").onclick=e=>{const b=e.target.closest("[data-ps]");if(!b)return;const a=b.dataset.ps.split("x");$("#pw").value=a[0];$("#ph").value=a[1];render()};
   ["#rw","#rh","#rd","#pw","#ph","#phw"].forEach(s=>$(s).addEventListener("input",render));
@@ -432,8 +407,8 @@ function dizayn(){
   $("#vwc").oninput=e=>{V.wall=e.target.value;render()};
   function setCustom(src){
     const img=new Image();
-    img.onload=()=>{custom=src;V.src="custom";$("#fileErr").textContent="";render()};
-    img.onerror=()=>{$("#fileErr").textContent="Rasmni yuklab bo'lmadi. Havolani yoki internetni tekshiring."};
+    img.onload=()=>{custom=src;cdim={w:img.naturalWidth,h:img.naturalHeight};V.src="custom";$("#fileErr").textContent="";render()};
+    img.onerror=()=>{$("#fileErr").textContent="Suratni ochib bo'lmadi. Boshqa fayl tanlang."};
     img.src=src;
   }
   function takeFile(f){
@@ -454,15 +429,14 @@ function dizayn(){
   };
   dropZone($("#drop"),takeFile);
   dropZone($("#rdrop"),takeRoom);
-  $("#netBtn").onclick=()=>netModal(setCustom);
+  $("#vrights").onchange=render;
   $("#vadd").onclick=()=>{
     const {R,pw,ph}=dims(),f=frameOf(V.frame),c=calcP(R,pw,ph),p=vProd(),total=c.sum+f.add;
     const sub=`Rasm ${nm(pw)}×${nm(ph)} sm, xona ${nm(R.w)}×${nm(R.h)}×${nm(R.d)} m, ${frameName(f)}`;
     if(p)return addToCart({key:"viz-"+p.id+"-"+nm(pw)+"x"+nm(ph)+"-"+nm(R.w)+"x"+nm(R.h)+"x"+nm(R.d)+"-"+f.id,title:p.title,sub,price:total,qty:1,th:thOf(p)});
-    if(!custom)return;
+    if(!custom||!$("#vrights").checked)return;
     const title=$("#vtitle").value.trim()||"Mening rasmim",src=custom,btn=$("#vadd");
-    /* internetdagi rasm: havolaning o'zi yetarli. O'z surati: xodim chop etishi uchun bazaga yuklanadi */
-    if(/^https:/i.test(src))return smallImg(src,d=>addToCart({key:"custom-"+Date.now(),title,sub,price:total,qty:1,th:d?{img:d}:{url:src},photo:src}));
+    /* o'z surati xodim chop etishi uchun bazaga yuklanadi */
     if(!DB)return toast("Bazaga ulanib bo'lmadi. Sahifani yangilang.");
     btn.disabled=true;btn.textContent="Surat yuklanmoqda...";
     squeeze(src,2400,950000)

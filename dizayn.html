@@ -8,7 +8,7 @@
 <title>Art Print | O'z dizaynim</title>
 <meta name="description" content="Rasmni xonangizda oldindan ko'ring: namuna xona yoki o'z xonangiz surati, haqiqiy o'lchamda. Narx avtomatik hisoblanadi.">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body data-page="dizayn">
 <main>
@@ -23,10 +23,13 @@
           <select id="vsrc"></select>
           <label class="drop" id="drop" for="file"><span class="ico">📷</span><strong>Suratni shu yerga tashlang</strong><span>yoki bosib tanlang (JPG, PNG, WEBP, 10 MB gacha)</span></label>
           <input class="vh" type="file" id="file" accept="image/*">
-          <button class="btn alt net" id="netBtn">Internetdan tanlash</button>
           <div class="err" id="fileErr"></div>
           <label for="vtitle">Nomi (o'z rasmingiz uchun)</label>
           <input type="text" id="vtitle" value="Mening rasmim" maxlength="40">
+          <div id="rightsBox">
+            <label class="chkl rights"><input type="checkbox" id="vrights"> Men bu suratdan foydalanish huquqiga egaman (o'zim olganman yoki muallif ruxsat bergan)</label>
+            <p class="meta">Begona rassom yoki fotografning ishini ruxsatsiz chop etmaymiz.</p>
+          </div>
         </div>
         <div class="step">
           <h2><b>2</b>Xona</h2>
@@ -75,7 +78,7 @@
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js?v=3"></script>
-<script src="script.js?v=3"></script>
+<script src="firebase-config.js?v=4"></script>
+<script src="script.js?v=4"></script>
 </body>
 </html>
