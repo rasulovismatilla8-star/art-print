@@ -399,3 +399,6 @@ footer{padding-bottom:calc(30px + env(safe-area-inset-bottom))}
 h3.bh{font-size:1rem;margin:6px 0}
 .chkl.rights{align-items:flex-start;font-weight:400;margin:14px 0 4px!important;line-height:1.35}
 .chkl.rights input{margin-top:1px}
+/* devordagi rasm oynasidagi yengil yaltirash */
+.vwall2 .fr,.vdrag .fr{position:relative}
+.vwall2 .fr::after,.vdrag .fr::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.2),rgba(255,255,255,.04) 38%,transparent 60%);pointer-events:none}
