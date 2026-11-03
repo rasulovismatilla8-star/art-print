@@ -4,7 +4,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Egasining Google emaili (kichik harflarda). firebase-config.js dagi OWNER_EMAIL bilan bir xil bo'lsin.
+    // Egasining Google emaili (kichik harflarda). assets/js/firebase-config.js dagi OWNER_EMAIL bilan bir xil bo'lsin.
     function ownerEmail() { return "magamedtursunbekov@gmail.com"; }
 
     function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }

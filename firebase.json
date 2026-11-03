@@ -12,7 +12,8 @@
       "**/.*",
       ".git/**",
       ".firebase/**",
-      "**/*-debug.log"
+      "**/*-debug.log",
+      "README.md"
     ],
     "headers": [
       {
